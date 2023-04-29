@@ -1,26 +1,30 @@
-type Entry = {
+declare interface LifehackerEntry {
   title: string
   link: string
   description: string
   category: string[]
   pubDate: string
-  guid: number
+  guid: {
+    '#text': number
+  }
   'dc:creator': string
-  'media:thumbnail': string
+  'media:thumbnail': {
+    '@_url': string
+  }
 }
 
-type Channel = {
+declare interface LifehackerChannel {
   title: string
   link: string
   'atom:link': string
   description: string
   language: string
-  item: Entry[]
+  item: LifehackerEntry[]
 }
 
 declare interface LifehackerFeed {
   '?xml': string
   rss: {
-    channel: Channel
+    channel: LifehackerChannel
   }
 }
