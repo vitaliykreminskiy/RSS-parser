@@ -1,19 +1,29 @@
 import _ from 'lodash'
+import moment from 'moment'
 
 import { DB } from '../knexfile'
 import { Logger } from '../lib/Logger'
-import moment from 'moment'
 import { extractTextFromHTML } from '../lib/Utils'
 
 type PostBase = Omit<Post, 'id'>
+type PageOptions = {
+  page: number
+  perPage?: number
+  search?: string
+}
 
 const LIFEHACKER_DATETIME_FORMAT: string = 'ddd, DD MMM YYYY HH:mm:ss Z'
 const MYSQL_DATETIME_FORMAT: string = 'YYYY-MM-DD HH:mm:ss'
 
 export class Post {
   public static readonly TABLE_NAME: string = 'posts'
+  public static readonly PER_PAGE_DEFAULT: number = 20
 
-  constructor() {}
+  private static readonly LOG_TAG: string = 'Post Model'
+
+  constructor(input: object) {
+    Object.assign(this, input)
+  }
 
   /**
    * Note that content contains raw html so we need to parse it for
@@ -62,10 +72,26 @@ export class Post {
       (post) => post.guid && !presentGUIDs.includes(post.guid)
     )
 
+    Logger.info(
+      Post.LOG_TAG,
+      `${posts.length} incoming. ${insertCandidates.length} new.`
+    )
+
     for (const post of insertCandidates) {
       await DB(Post.TABLE_NAME).insert(post)
       Logger.info('Post inserted', post.title)
     }
+  }
+
+  static page = async (options: PageOptions): Promise<Post> => {
+    const page: number = options.page || 1
+    const pageSize: number = options.perPage || Post.PER_PAGE_DEFAULT
+    const offset = (page - 1) * pageSize
+
+    const posts = await DB(Post.TABLE_NAME)
+      .select('*')
+      .offset(offset)
+      .limit(pageSize)
   }
 
   public id!: number
