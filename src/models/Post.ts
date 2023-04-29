@@ -4,13 +4,9 @@ import moment from 'moment'
 import { DB } from '../knexfile'
 import { Logger } from '../lib/Logger'
 import { extractTextFromHTML } from '../lib/Utils'
+import { Knex } from 'knex'
 
-type PostBase = Omit<Post, 'id'>
-type PageOptions = {
-  page: number
-  perPage?: number
-  search?: string
-}
+export type PostBase = Omit<Post, 'id'>
 
 const LIFEHACKER_DATETIME_FORMAT: string = 'ddd, DD MMM YYYY HH:mm:ss Z'
 const MYSQL_DATETIME_FORMAT: string = 'YYYY-MM-DD HH:mm:ss'
@@ -20,6 +16,7 @@ export class Post {
   public static readonly PER_PAGE_DEFAULT: number = 20
 
   private static readonly LOG_TAG: string = 'Post Model'
+  private static query: Knex.QueryBuilder = DB<Post>(Post.TABLE_NAME)
 
   constructor(input: object) {
     Object.assign(this, input)
@@ -62,9 +59,9 @@ export class Post {
    * (determined by `guid` column)
    */
   static insertFeedBatch = async (posts: PostBase[]) => {
-    const presentPosts: Array<Pick<Post, 'guid'>> = await DB<Post>(
-      Post.TABLE_NAME
-    ).select('guid')
+    const presentPosts: Array<Pick<Post, 'guid'>> = await Post.query.select(
+      'guid'
+    )
     const presentGUIDs: string[] = presentPosts
       .filter((post) => Boolean(post.guid))
       .map((post) => post.guid) as string[]
@@ -78,20 +75,60 @@ export class Post {
     )
 
     for (const post of insertCandidates) {
-      await DB(Post.TABLE_NAME).insert(post)
+      await DB<Post>(Post.TABLE_NAME).insert(post)
       Logger.info('Post inserted', post.title)
     }
   }
 
-  static page = async (options: PageOptions): Promise<Post> => {
+  static getPage = async (options: PageOptions): Promise<Page<Post>> => {
     const page: number = options.page || 1
     const pageSize: number = options.perPage || Post.PER_PAGE_DEFAULT
     const offset = (page - 1) * pageSize
 
-    const posts = await DB(Post.TABLE_NAME)
+    const results: Post[] = await Post.query
       .select('*')
       .offset(offset)
       .limit(pageSize)
+    const count: number = await Post.query
+      .count()
+      .then((result) => _.get(result, ['0', 'count(*)'], 0))
+
+    return { results, count }
+  }
+
+  static create = async (post: PostBase): Promise<Post> => {
+    const insertedIds = await Post.query.insert(post)
+    const insertedId: number = insertedIds[0]
+
+    return Post.query
+      .select('*')
+      .where('id', insertedId)
+      .first()
+      .then((record) => new Post(record))
+  }
+
+  static update = async (
+    postId: number,
+    payload: Partial<Post>
+  ): Promise<Post> => {
+    const preparedPayload: Partial<Post> = _.omit(payload, 'id')
+
+    await Post.query.where('id', postId).update(preparedPayload)
+
+    return Post.query.select('*').where('id', postId).first()
+  }
+
+  static delete = async (postId: number): Promise<void> =>
+    Post.query.where('id', postId).del()
+
+  static find = async (postId: number): Promise<Post | undefined> => {
+    const post = await Post.query.where('id', postId).first()
+
+    if (!post) {
+      throw new Error('Post not found')
+    }
+
+    return post
   }
 
   public id!: number
