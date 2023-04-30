@@ -16,7 +16,8 @@ export class Post {
   public static readonly PER_PAGE_DEFAULT: number = 20
 
   private static readonly LOG_TAG: string = 'Post Model'
-  private static query: Knex.QueryBuilder = DB<Post>(Post.TABLE_NAME)
+  private static query: () => Knex.QueryBuilder = () =>
+    DB<Post>(Post.TABLE_NAME)
 
   constructor(input: object) {
     Object.assign(this, input)
@@ -59,7 +60,7 @@ export class Post {
    * (determined by `guid` column)
    */
   static insertFeedBatch = async (posts: PostBase[]) => {
-    const presentPosts: Array<Pick<Post, 'guid'>> = await Post.query
+    const presentPosts: Array<Pick<Post, 'guid'>> = await Post.query()
       .select('guid')
       .whereNotNull('guid')
 
@@ -76,7 +77,7 @@ export class Post {
     )
 
     for (const post of insertCandidates) {
-      await Post.query.insert(post)
+      await Post.query().insert(post)
       Logger.info('Post inserted', post.title)
     }
   }
@@ -86,11 +87,11 @@ export class Post {
     const pageSize: number = options.perPage || Post.PER_PAGE_DEFAULT
     const offset = (page - 1) * pageSize
 
-    const results: Post[] = await Post.query
+    const results: Post[] = await Post.query()
       .select('*')
       .offset(offset)
       .limit(pageSize)
-    const count: number = await Post.query
+    const count: number = await Post.query()
       .count()
       .then((result) => _.get(result, ['0', 'count(*)'], 0))
 
@@ -98,10 +99,10 @@ export class Post {
   }
 
   static create = async (post: PostBase): Promise<Post> => {
-    const insertedIds = await Post.query.insert(post)
+    const insertedIds = await Post.query().insert(post)
     const insertedId: number = insertedIds[0]
 
-    return Post.query
+    return Post.query()
       .select('*')
       .where('id', insertedId)
       .first()
@@ -114,16 +115,16 @@ export class Post {
   ): Promise<Post> => {
     const preparedPayload: Partial<Post> = _.omit(payload, 'id')
 
-    await Post.query.where('id', postId).update(preparedPayload)
+    await Post.query().where('id', postId).update(preparedPayload)
 
-    return Post.query.select('*').where('id', postId).first()
+    return Post.query().select('*').where('id', postId).first()
   }
 
   static delete = async (postId: number): Promise<void> =>
-    Post.query.where('id', postId).del()
+    Post.query().where('id', postId).del()
 
   static find = async (postId: number): Promise<Post | undefined> => {
-    const post = await Post.query.where('id', postId).first()
+    const post = await Post.query().where('id', postId).first()
 
     if (!post) {
       throw new Error('Post not found')

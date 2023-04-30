@@ -2,3 +2,4 @@ node_modules/
 /artifactss
 
 .env
+yarn-error.log

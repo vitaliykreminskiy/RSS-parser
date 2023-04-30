@@ -8,7 +8,7 @@ PostsController.get(
   (req: Request<{}, {}, {}, PageOptions>, res: Response) =>
     Post.getPage(req.params)
       .then((posts) => res.json(posts))
-      .catch((_) => res.status(500).send())
+      .catch((e) => res.status(500).send())
 )
 
 PostsController.post('/', (req: Request<{}, {}, PostBase>, res: Response) =>
