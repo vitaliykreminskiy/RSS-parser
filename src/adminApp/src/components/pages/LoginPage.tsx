@@ -1,13 +1,20 @@
-import React, { FC, useState } from 'react'
+import React, { FC } from 'react'
+import { useFormik } from 'formik'
 import { Container, Stack, Typography, TextField, Button } from '@mui/material'
-import { blue } from '@mui/material/colors'
 import RssFeedIcon from '@mui/icons-material/RssFeed'
 
 import { CONFIG } from '../../config/app'
+import { useSession } from '../providers/SessionProvider'
 
 export const LoginPage: FC = () => {
-  const [username, setUsername] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
+  const { logIn } = useSession()
+  const { values, handleSubmit, handleChange } = useFormik({
+    initialValues: {
+      username: '',
+      password: '',
+    },
+    onSubmit: (values) => logIn(values),
+  })
 
   return (
     <Container maxWidth="sm">
@@ -30,9 +37,9 @@ export const LoginPage: FC = () => {
           id="outlined-basic"
           label="Username"
           variant="outlined"
-          value={username}
+          value={values.username}
           size="small"
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={handleChange('username')}
           sx={{ mt: 1 }}
         />
         <TextField
@@ -40,14 +47,14 @@ export const LoginPage: FC = () => {
           id="outlined-basic"
           label="Password"
           variant="outlined"
-          value={password}
+          value={values.password}
           size="small"
           sx={{ mt: 1 }}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={handleChange('password')}
         />
         <Button
           sx={{ mt: 2 }}
-          onClick={() => true}
+          onClick={() => handleSubmit()}
           size="large"
           variant="contained"
         >

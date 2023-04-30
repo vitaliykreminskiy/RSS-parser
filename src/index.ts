@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { Request, Response } from 'express'
 
 import { CONFIG } from './config/app'
 import { scheduleParsingJob } from './lib/JobScheduler'
@@ -15,6 +15,8 @@ const app = express()
 // })
 
 app.use(express.json())
+
+app.post('/api/echo', (req: Request, res: Response) => res.json(req.body))
 
 app.use('/api/auth', AuthController)
 app.use('/api/posts', JWTProtectedMiddleware, PostsController)
