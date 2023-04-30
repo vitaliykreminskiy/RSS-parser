@@ -1,10 +1,10 @@
 import _ from 'lodash'
+import { Knex } from 'knex'
 import moment from 'moment'
 
 import { DB } from '../knexfile'
 import { Logger } from '../lib/Logger'
 import { extractTextFromHTML } from '../lib/Utils'
-import { Knex } from 'knex'
 
 export type PostBase = Omit<Post, 'id'>
 
@@ -95,7 +95,7 @@ export class Post {
       .count()
       .then((result) => _.get(result, ['0', 'count(*)'], 0))
 
-    return { results, count }
+    return { results, count } as Page<Post>
   }
 
   static create = async (post: PostBase): Promise<Post> => {
