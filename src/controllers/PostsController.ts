@@ -3,7 +3,6 @@ import { Post, PostBase } from '../models/Post'
 
 export const PostsController = Router()
 
-// TODO: Add error handling middleware
 PostsController.get(
   '/',
   (req: Request<{}, {}, {}, PageOptions>, res: Response) =>

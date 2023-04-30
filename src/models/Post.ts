@@ -59,9 +59,10 @@ export class Post {
    * (determined by `guid` column)
    */
   static insertFeedBatch = async (posts: PostBase[]) => {
-    const presentPosts: Array<Pick<Post, 'guid'>> = await Post.query.select(
-      'guid'
-    )
+    const presentPosts: Array<Pick<Post, 'guid'>> = await Post.query
+      .select('guid')
+      .whereNotNull('guid')
+
     const presentGUIDs: string[] = presentPosts
       .filter((post) => Boolean(post.guid))
       .map((post) => post.guid) as string[]
@@ -75,7 +76,7 @@ export class Post {
     )
 
     for (const post of insertCandidates) {
-      await DB<Post>(Post.TABLE_NAME).insert(post)
+      await Post.query.insert(post)
       Logger.info('Post inserted', post.title)
     }
   }
