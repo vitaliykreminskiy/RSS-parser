@@ -9,10 +9,7 @@ PostsController.get(
   (req: Request<{}, {}, {}, PageOptions>, res: Response) =>
     Post.getPage(req.query)
       .then((posts) => res.json(posts))
-      .catch((e) => {
-        Logger.error('Error', e)
-        res.status(500).send()
-      })
+      .catch((e) => res.status(500).send())
 )
 
 PostsController.post('/', (req: Request<{}, {}, PostBase>, res: Response) =>
