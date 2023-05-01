@@ -26,3 +26,11 @@
 1. `cd` to `admin` directory
 2. Run `yarn` to install dependencies
 3. Run `yarn up` to start the server (will be launched on port `5000` if it is not occupied)
+
+- Navigate to `localhost:5000`
+
+##### Attention!
+
+This app is not production ready and presented as a demonstration of basic skills. If you need production build, please let me know!
+
+Parser job starts on server launch and parse entries once for a minute.
