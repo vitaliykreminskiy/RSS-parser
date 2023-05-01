@@ -86,14 +86,52 @@ export class Post {
     const page: number = options.page || 1
     const pageSize: number = options.perPage || Post.PER_PAGE_DEFAULT
     const offset = (page - 1) * pageSize
+    const searchTerm: string = options.search || ''
 
     const results: Post[] = await Post.query()
       .select('*')
       .offset(offset)
+      .orderBy('published_at', options.sort === 'oldest' ? 'asc' : 'desc')
+
+      .modify((queryBuilder) => {
+        if (searchTerm) {
+          queryBuilder.whereRaw(
+            'MATCH(content, title, author) AGAINST( ? IN NATURAL LANGUAGE MODE)',
+            [searchTerm]
+          )
+
+          /**
+           * Search relevance have bigger priority than sort param
+           */
+          queryBuilder.orderByRaw(
+            'MATCH(content, title, author) AGAINST( ? IN NATURAL LANGUAGE MODE)',
+            [searchTerm]
+          )
+        }
+      })
+
+      /**
+       * Here may also be the filtrations but we don't have corresponding field
+       * for that
+       */
+
       .limit(pageSize)
-    const count: number = await Post.query()
-      .count()
-      .then((result) => _.get(result, ['0', 'count(*)'], 0))
+
+    let count: number = 0
+
+    if (searchTerm) {
+      count = await Post.query()
+        .whereRaw(
+          'MATCH(content, title, author) AGAINST( ? IN NATURAL LANGUAGE MODE)',
+          [searchTerm]
+        )
+        .count()
+        .then((result) => _.get(result, ['0', 'count(*)'], 0))
+    } else {
+      count = await Post.query()
+        .count()
+        .then((result) => _.get(result, ['0', 'count(*)'], 0))
+    }
 
     return { results, count } as Page<Post>
   }
