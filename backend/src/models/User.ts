@@ -28,6 +28,9 @@ export class User {
     credentials: LoginCredentials
   ): Promise<User> => {
     const passwordHash: string = getMD5(credentials.password)
+
+    console.log(passwordHash)
+
     const user: User = await User.query()
       .select('*')
       .where({
@@ -35,6 +38,11 @@ export class User {
         password: passwordHash,
       })
       .first()
+
+    console.log({
+      ...credentials,
+      password: passwordHash,
+    })
 
     if (!user) {
       throw new Error('User not found')

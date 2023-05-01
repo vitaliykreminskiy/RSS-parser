@@ -5,7 +5,7 @@ const rootEnvFilePath: string = path.join(__dirname, '..', '..', '.env')
 dotenv.config({ path: rootEnvFilePath })
 
 export const CONFIG = {
-  PORT: Number(process.env.PORT || 3000),
+  PORT: 3000,
 
   DB_PORT: Number(process.env.DB_PORT || 3306),
   DB_HOST: process.env.DB_HOST as string,
