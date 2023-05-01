@@ -31,7 +31,7 @@
     "ts-node": "^10.9.1"
   },
   "scripts": {
-    "dev": "nodemon",
+    "up": "nodemon",
     "db:seed": "npx knex seed:run --knexfile=src/knexfile.ts",
     "db:migrate": "npx knex migrate:latest --knexfile=src/knexfile.ts",
     "db:rollback": "npx knex migrate:rollback --knexfile=src/knexfile.ts"

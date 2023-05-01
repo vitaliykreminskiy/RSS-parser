@@ -24,8 +24,7 @@
     "webpack-dev-server": "^4.13.3"
   },
   "scripts": {
-    "dev": "npx webpack serve --config webpack.dev.js",
-    "build": "npx webpack --config webpack.prod.js"
+    "up": "npx webpack serve --config webpack.dev.js"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
