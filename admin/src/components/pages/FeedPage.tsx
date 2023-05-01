@@ -8,55 +8,59 @@ import {
   Select,
   Stack,
   Typography,
-} from "@mui/material";
-import React, { FC, createContext, useEffect, useMemo, useState } from "react";
-import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+} from '@mui/material'
+import React, { FC, createContext, useEffect, useMemo, useState } from 'react'
+import ExitToAppIcon from '@mui/icons-material/ExitToApp'
 
-import API from "../../config/requests";
-import { PostsView } from "../containers/PostsView";
-import { PostBase, PostEditModal } from "../containers/PostEditModal";
-import { useSession } from "../providers/SessionProvider";
+import API from '../../config/requests'
+import { PostsView } from '../containers/PostsView'
+import { PostBase, PostEditModal } from '../containers/PostEditModal'
+import { useSession } from '../providers/SessionProvider'
 
 enum SortOrder {
-  NEWEST = "newest",
-  OLDEST = "oldest",
+  NEWEST = 'newest',
+  OLDEST = 'oldest',
 }
 
 type FeedPageContextType = {
-  loadPosts: () => any;
-};
+  loadPosts: () => any
+}
 
-const PER_PAGE: number = 50;
+const PER_PAGE: number = 50
 const postBoilerplate: PostBase = {
-  author: "",
-  title: "",
-  content: "",
-};
+  author: '',
+  title: '',
+  content: '',
+}
 
 export const FeedPageContext = createContext<FeedPageContextType>({
   loadPosts: () => true,
-});
+})
 
 export const FeedPage: FC = () => {
-  const [newPost, setNewPost] = useState<PostBase | undefined>(undefined);
-  const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.NEWEST);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [page, setPage] = useState<number>(1);
+  const [newPost, setNewPost] = useState<PostBase | undefined>(undefined)
+  const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.NEWEST)
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [page, setPage] = useState<number>(1)
   const [postsPage, setPostsPage] = useState<Page<Post>>({
     count: 0,
     results: [],
-  });
+  })
 
-  const { logOut } = useSession();
+  const { logOut } = useSession()
 
   useEffect(() => {
-    loadPosts();
-    setPage(1);
-  }, [page, searchTerm, sortOrder]);
+    loadPosts()
+    setPage(1)
+  }, [searchTerm, sortOrder])
+
+  useEffect(() => {
+    loadPosts()
+  }, [page])
 
   const totalPages: number = useMemo((): number => {
-    return Math.ceil(postsPage.count / PER_PAGE);
-  }, [postsPage.count]);
+    return Math.ceil(postsPage.count / PER_PAGE)
+  }, [postsPage.count])
 
   const loadPosts = () => {
     API.getPostsPage({
@@ -65,11 +69,11 @@ export const FeedPage: FC = () => {
       search: searchTerm,
       sort: sortOrder,
     }).then((result) => {
-      setPostsPage(result);
-    });
-  };
+      setPostsPage(result)
+    })
+  }
 
-  const onNewPostPressed = () => setNewPost(postBoilerplate);
+  const onNewPostPressed = () => setNewPost(postBoilerplate)
 
   return (
     <Container maxWidth="lg">
@@ -131,7 +135,7 @@ export const FeedPage: FC = () => {
       {postsPage.count > 0 ? (
         <Stack direction="row" justifyContent="center">
           <Pagination
-            sx={{ alignSelf: "center", my: 1 }}
+            sx={{ alignSelf: 'center', my: 1 }}
             page={page}
             onChange={(_, page) => setPage(page)}
             count={totalPages}
@@ -145,5 +149,5 @@ export const FeedPage: FC = () => {
         onClose={() => setNewPost(undefined)}
       />
     </Container>
-  );
-};
+  )
+}
