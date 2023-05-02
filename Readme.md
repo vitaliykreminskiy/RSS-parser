@@ -27,7 +27,7 @@
 2. Run `yarn` to install dependencies
 3. Run `yarn up` to start the server (will be launched on port `5000` if it is not occupied)
 
-- Navigate to `localhost:5000`
+- Navigate to `localhost:5000` - you should be able to login with username: `admin` and password `admin`
 
 ##### Attention!
 
