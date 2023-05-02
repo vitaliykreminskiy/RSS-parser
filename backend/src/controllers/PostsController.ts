@@ -35,9 +35,5 @@ PostsController.put(
   (req: Request<{ id: number }, {}, Partial<PostBase>>, res: Response) =>
     Post.update(req.params.id, req.body)
       .then((post) => res.status(201).json(post))
-      .catch((_) => {
-        console.log(_)
-
-        res.status(500).send()
-      })
+      .catch((_) => res.status(500).send())
 )
